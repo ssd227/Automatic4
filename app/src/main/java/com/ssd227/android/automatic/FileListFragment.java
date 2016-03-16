@@ -33,7 +33,6 @@ public class FileListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-
         Stack<File> files = scaner();
         String[] filenames = new String[files.size()];
         int i=0;
