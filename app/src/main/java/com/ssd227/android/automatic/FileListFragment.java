@@ -21,13 +21,10 @@ import java.util.Stack;
  * A simple {@link Fragment} subclass.
  */
 public class FileListFragment extends ListFragment {
-    private Activity myActivity = null;
-
 
     public FileListFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

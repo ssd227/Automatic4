@@ -4,4 +4,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="mainTitle">files in WIP2P</string>
+    <string name="send_button">send files</string>
+    <string name="enable_p2p_button">enable p2p wifi</string>
+    <string name="discover_peers_button">discover peers</string>
 </resources>
