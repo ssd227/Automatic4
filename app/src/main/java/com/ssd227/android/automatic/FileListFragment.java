@@ -33,25 +33,26 @@ public class FileListFragment extends ListFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Stack<File> files = scaner();
-        String[] filenames = new String[files.size()];
-        int i=0;
-
-        for (File fi : scaner()){
-            filenames[i] = fi.getName();
-            i++;
-        }
-
-
+        String[] filenames = stackToNames(scaner());
+        //set list adapter
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(
                 inflater.getContext(),
                 android.R.layout.simple_list_item_1,
                 filenames);
         setListAdapter(listAdapter);
-
-
         // Inflate the layout for this fragment
         return super.onCreateView(inflater,container,savedInstanceState);
+    }
+
+
+    private String[] stackToNames(Stack<File> files){
+        String[] filenames = new String[files.size()];
+        int i=0;
+        for (File fi : scaner()){
+            filenames[i] = fi.getName();
+            i++;
+        }
+        return  filenames;
     }
 
     private Stack<File> scaner(){
