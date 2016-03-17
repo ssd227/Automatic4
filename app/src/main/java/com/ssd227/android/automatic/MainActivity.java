@@ -25,6 +25,9 @@ public class MainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.atn_direct_send:
+                final FileListFragment fragment = (FileListFragment) getFragmentManager()
+                        .findFragmentById(R.id.frag_fileList);
+                fragment.send(10);
 
                 return true;
             case R.id.atn_direct_discover:

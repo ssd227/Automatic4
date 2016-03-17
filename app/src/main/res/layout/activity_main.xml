@@ -13,7 +13,7 @@
 
     <fragment
         class="com.ssd227.android.automatic.FileListFragment"
-        android:id = "@+id/fileList"
+        android:id = "@+id/frag_fileList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
