@@ -7,4 +7,5 @@
     <string name="send_button">send files</string>
     <string name="enable_p2p_button">enable p2p wifi</string>
     <string name="discover_peers_button">discover peers</string>
+    <string name="p2p_off_warning">P2P  is off</string>
 </resources>
