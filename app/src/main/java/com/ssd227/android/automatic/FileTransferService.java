@@ -29,8 +29,10 @@ public class FileTransferService extends IntentService
     private static final int SOCKET_TIMEOUT = 5000;
     public static final String ACTION_SEND_FILE = "com.example.android.wifidirect.SEND_FILE";
     public static final String EXTRAS_FILE_PATH = "file_url";
+    public static final String EXTRAS_FILE_COPY_NUM = "copy num";
     public static final String EXTRAS_GROUP_OWNER_ADDRESS = "go_host";
     public static final String EXTRAS_GROUP_OWNER_PORT = "go_port";
+
 
     public FileTransferService(String name)
     {
@@ -55,8 +57,10 @@ public class FileTransferService extends IntentService
         if (intent.getAction().equals(ACTION_SEND_FILE))
         {
             String filepath = intent.getExtras().getString(EXTRAS_FILE_PATH);
-            String host = intent.getExtras().getString(EXTRAS_GROUP_OWNER_ADDRESS);
+            int copy_num = intent.getExtras().getInt(EXTRAS_FILE_COPY_NUM);
 
+
+            String host = intent.getExtras().getString(EXTRAS_GROUP_OWNER_ADDRESS);
             Socket socket = new Socket();
             int port = intent.getExtras().getInt(EXTRAS_GROUP_OWNER_PORT);
 
@@ -85,17 +89,20 @@ public class FileTransferService extends IntentService
                 String filename = file.getName();
 
 
-                new DataOutputStream(outputStream).writeUTF(filename);
-
                 //send file name
-                // outputStream.write(filename.getBytes());
-                Log.d(MainActivity.TAG, "send file name :" + filename);
+                new DataOutputStream(outputStream).writeUTF(filename);
                 outputStream.flush();
+                Log.d(MainActivity.TAG, "send file name :" + filename);
+
+
+                //send copy number
+                new DataOutputStream(outputStream).writeInt(copy_num);
+                outputStream.flush();
+                Log.d(MainActivity.TAG, "send copy number ");
+
 
                 //send file data
                 FileInputStream fileInputStream = new FileInputStream(file);
-
-
 
                 FileListFragment.copyFile(fileInputStream, outputStream);
                 outputStream.flush();

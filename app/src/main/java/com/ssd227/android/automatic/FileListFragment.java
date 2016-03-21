@@ -1,5 +1,6 @@
 package com.ssd227.android.automatic;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.ListFragment;
 import android.content.Context;
@@ -37,7 +38,9 @@ import java.util.Stack;
 public class FileListFragment extends ListFragment
         implements  ConnectionInfoListener
 {
-    private HashMap<String,Integer> fileHash = null;
+    public static HashMap<String,Integer> fileHash = null;
+    public static HashMap<Integer, Socket> clientHash = new HashMap<>();
+
     private final String systemHashPath =Environment.getExternalStorageDirectory()
             + "/WIFIP2P"+"/hashMap.data";
 
@@ -83,12 +86,23 @@ public class FileListFragment extends ListFragment
         // server. The file server is single threaded, single connection server
         // socket.
         // After the group negotiation, we can determine the group owner.
-        if (info.groupFormed && info.isGroupOwner) {
+        if (info.groupFormed && info.isGroupOwner)
+        {
             // Do whatever tasks are specific to the group owner.
             // One common case is creating a server thread and accepting
             // incoming connections.
-            new FileServerAsyncTask(getActivity() ).execute();
-        } else if (info.groupFormed) {
+            new FileServerAsyncTask(getActivity()).execute();
+
+
+        }
+        else if (info.groupFormed)
+        {
+            //sleep 2s
+            try {
+                Thread.currentThread().sleep((2000));//阻断2秒
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             // The other device acts as the client. In this case,
             // you'll want to create a client thread that connects to the group
             // owner.
@@ -103,43 +117,47 @@ public class FileListFragment extends ListFragment
             Stack<File> fileStack = new Stack<>();
             findAllFiles(dirs, fileStack);
 
-            //for test
-            for (File file : fileStack) {
-                Log.d(MainActivity.TAG, file.getAbsolutePath());
-            }
+
 
             if (!fileStack.empty()) {
                 Log.d(MainActivity.TAG, "stack is not empty");
 
-                File file = fileStack.pop();
+                //for test
+                for (File file : fileStack)
+                {
+                    Log.d(MainActivity.TAG, file.getAbsolutePath());
+                    //hashMap check
+                    String name = file.getName();
+                    int num = fileHash.get(name);
+                    if(num > 1)
+                    {
+                        fileHash.put(name,num - num/2);
+                        String filepath = file.getAbsolutePath();
+                        //
+                        // open a new client to send  each file
+                        Intent serviceIntent = new Intent(getActivity(),
+                                FileTransferService.class);
+                        serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 
-                Log.d(MainActivity.TAG, "the filepath choosed is "
-                        + file.getAbsolutePath());
+                        // add some extra info
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filepath);
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_COPY_NUM, num/2);
 
-                if (file != null) {
-                    Log.d(MainActivity.TAG,
-                            "file choosed is not null \nfilename is" + file.getName());
+                        // network info
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_ADDRESS,
+                                info.groupOwnerAddress.getHostAddress());
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_PORT, 8988);
 
-                    String filepath = file.getAbsolutePath();
-
-                    Intent serviceIntent = new Intent(getActivity(),
-                            FileTransferService.class);
-                    serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
-                    // add some extra info
-                    serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH,
-                            filepath);
-                    serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_ADDRESS,
-                            info.groupOwnerAddress.getHostAddress());
-                    serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_PORT,
-                            8988);
-                    getActivity().startService(serviceIntent);
-
+                        getActivity().startService(serviceIntent);
+                    }
                 }
             }
         }
 
 
     }
+
+
 
     /**
      * make all value in hashMap  10 copies
@@ -275,7 +293,7 @@ public class FileListFragment extends ListFragment
      * A simple server socket that accepts connection and writes some data on
      * the stream.
      */
-    public static class FileServerAsyncTask extends AsyncTask<Void, Void, String>
+    public static class FileServerAsyncTask extends AsyncTask<Void, Void, Void>
     {
 
         private Context context;
@@ -286,93 +304,49 @@ public class FileListFragment extends ListFragment
         public FileServerAsyncTask(Context context)
         {
             this.context = context;
-
         }
 
         @Override
-        protected String doInBackground(Void... params)
+        protected Void doInBackground(Void... params)
         {
-            ServerSocket serverSocket =null;
-            Socket client =null;
 
             try
             {
-                /**
-                 * Create a server socket and wait for client connections. This
-                 * call blocks until a connection is accepted from a client
-                 */
-                serverSocket = new ServerSocket(8988);
+                ServerSocket serverSocket = new ServerSocket(8988);
                 Log.d(MainActivity.TAG, "Server: Socket opened");
 
-                client = serverSocket.accept();
-                Log.d(MainActivity.TAG, "Server: connection done");
 
-                /**
-                 * If this code is reached, a client has connected and transferred data
-                 * Save the input stream from the client as a JPEG file
-                 */
+                int i=0;
+                while (true){
+                    Socket client = serverSocket.accept();
+                    Log.d(MainActivity.TAG, "Server: connection done");
 
-                InputStream inputstream = client.getInputStream();
+                    //
+                    // open a new client to receive  each file
+                    Intent serviceIntent = new Intent(context,
+                            FileTransferService.class);
+                    serviceIntent.setAction(FileReceiveService.ACTION_RECEIVE_FILE);
 
+                    // add some extra info
+                    clientHash.put(i,client);
+                    serviceIntent.putExtra(FileReceiveService.EXTRAS_FILE_CLIENT,i);
+                    context.startService(serviceIntent);
 
-                String filename = new DataInputStream(inputstream).readUTF();
+                    i++;
 
-                final File f = new File(
-                        Environment.getExternalStorageDirectory() + "/WIFIP2P/"
-                                +"/Date/" +filename);
+                }
 
-                File dirs = new File(f.getParent());
-                if (!dirs.exists())
-                    dirs.mkdirs();
-                f.createNewFile();
-
-                Log.d(MainActivity.TAG,
-                        "server: copying files " + f.toString());
-
-
-                copyFile(inputstream, new FileOutputStream(f));
-
-                serverSocket.close();
-
-                return f.getAbsolutePath();
             }
             catch (IOException e) {
                 Log.e(MainActivity.TAG, e.getMessage());
-                return null;
             }
             finally {
-                if(serverSocket != null){
-                    try{
-                        serverSocket.close();
-                    }
-                    catch (IOException e){
-                        // Give up
-                        e.printStackTrace();
-                    }
-                }
+
+                return null;
             }
 
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-         */
-        /**
-         * Start activity that can handle the JPEG image
-         */
-        @Override
-        protected void onPostExecute(String result)
-        {
-            if (result != null)
-            {
-                Intent intent = new Intent();
-                intent.setAction(android.content.Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse("file://" + result), "*/*");
-                context.startActivity(intent);
-            }
-        }
         /*
          * (non-Javadoc)
          *
