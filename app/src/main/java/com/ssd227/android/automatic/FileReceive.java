@@ -1,8 +1,5 @@
 package com.ssd227.android.automatic;
 
-
-import android.app.IntentService;
-import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
@@ -13,28 +10,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-public class FileReceiveService  extends IntentService
+
+/**
+ * Created by ssd on 16/3/21.
+ */
+
+public class FileReceive implements Runnable
 {
+    private Socket client;
 
-
-    public static final String ACTION_RECEIVE_FILE = "RECEIVE_FILE";
-    public static final String EXTRAS_FILE_CLIENT = "client";
-
-    public FileReceiveService(String name)
+    /**
+     Constructs a handler.
+     @param client the incoming socket
+     */
+    public FileReceive(Socket client)
     {
-        super(name);
+        this.client = client;
     }
 
-    public FileReceiveService()
+    public void run()
     {
-        super("FileReceiveService");
-    }
-
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        Integer i = intent.getExtras().getInt(EXTRAS_FILE_CLIENT);
-        Socket client = FileListFragment.clientHash.get(i);
-
         try{
             InputStream inputstream = client.getInputStream();
 
@@ -60,7 +55,6 @@ public class FileReceiveService  extends IntentService
 
             FileListFragment.copyFile(inputstream, new FileOutputStream(f));
 
-            FileListFragment.clientHash.remove(i);
             client.close();
         }
         catch (IOException e) {
@@ -68,6 +62,7 @@ public class FileReceiveService  extends IntentService
         }
 
 
-
     }
+
 }
+

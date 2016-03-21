@@ -37,9 +37,6 @@
         <service
             android:name=".FileTransferService"
             android:enabled="true" />
-        <service
-            android:name=".FileReceiveService"
-            android:enabled="true"/>
 
     </application>
 

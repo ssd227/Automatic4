@@ -27,9 +27,11 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.Stack;
 
 /**
@@ -39,7 +41,7 @@ public class FileListFragment extends ListFragment
         implements  ConnectionInfoListener
 {
     public static HashMap<String,Integer> fileHash = null;
-    public static HashMap<Integer, Socket> clientHash = new HashMap<>();
+
 
     private final String systemHashPath =Environment.getExternalStorageDirectory()
             + "/WIFIP2P"+"/hashMap.data";
@@ -321,17 +323,9 @@ public class FileListFragment extends ListFragment
                     Socket client = serverSocket.accept();
                     Log.d(MainActivity.TAG, "Server: connection done");
 
-                    //
-                    // open a new client to receive  each file
-                    Intent serviceIntent = new Intent(context,
-                            FileTransferService.class);
-                    serviceIntent.setAction(FileReceiveService.ACTION_RECEIVE_FILE);
-
-                    // add some extra info
-                    clientHash.put(i,client);
-                    serviceIntent.putExtra(FileReceiveService.EXTRAS_FILE_CLIENT,i);
-                    context.startService(serviceIntent);
-
+                    Runnable r = new FileReceive(client);
+                    Thread t = new Thread(r);
+                    t.start();
                     i++;
 
                 }
@@ -381,6 +375,9 @@ public class FileListFragment extends ListFragment
         }
         return true;
     }
+
+
+
 
 
 }
