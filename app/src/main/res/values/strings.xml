@@ -8,4 +8,7 @@
     <string name="enable_p2p_button">enable p2p wifi</string>
     <string name="discover_peers_button">discover peers</string>
     <string name="p2p_off_warning">P2P  is off</string>
+    <string name="peer_name">Peer:</string>
+    <string name="my_device_name">ME:</string>
+    <string name="disconnect_button">disconnect</string>
 </resources>

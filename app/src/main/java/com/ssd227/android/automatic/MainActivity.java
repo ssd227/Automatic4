@@ -19,6 +19,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class MainActivity extends Activity
 
     private boolean isWifiP2pEnabled = false;
     private boolean retryChannel = false;
+    private boolean isconnected = false;
 
     private final IntentFilter intentFilter = new IntentFilter();
 
@@ -108,11 +111,7 @@ public class MainActivity extends Activity
                 return;
             }
         }
-
-
-
         //do something to avoid conflict
-
         try {
             Thread.currentThread().sleep((int)(Math.random()*3000));//阻断2秒
         } catch (InterruptedException e) {
@@ -125,13 +124,13 @@ public class MainActivity extends Activity
         config.wps.setup = WpsInfo.PBC;
         config.groupOwnerIntent = 0;
 
-
         manager.connect(channel, config, new ActionListener() {
-
             @Override
             public void onSuccess() {
                 oldDeviceName = device.deviceName;
                 Log.d(MainActivity.TAG, "connect successfully");
+                updatePeerDeviceName(device);
+                isconnected = true;
             }
 
             @Override
@@ -146,7 +145,7 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.action_items,menu);
+        getMenuInflater().inflate(R.menu.action_items, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -190,6 +189,31 @@ public class MainActivity extends Activity
                 });
                 return true;
 
+            /*
+            case R.id.atn_direct_disconnect:
+                if(isconnected){
+
+                    manager.cancelConnect(channel,new WifiP2pManager.ActionListener() {
+
+                        @Override
+                        public void onSuccess() {
+                            isconnected = false;
+                            Toast.makeText(MainActivity.this,
+                                    "disconnect successful", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(int reasonCode) {
+                            Toast.makeText(MainActivity.this,
+                                    "disconnect Failed : " + reasonCode,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                    });
+                }
+                */
+
+
             case R.id.atn_direct_enable:
                 if (manager != null && channel != null)
                 {
@@ -203,9 +227,22 @@ public class MainActivity extends Activity
                 }
                 return true;
 
+
             default:
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    public void updatePeerDeviceName(WifiP2pDevice device){
+        String DeviceName = device.deviceName;
+        TextView peer = (TextView)findViewById(R.id.peer_device);
+        peer.setText(DeviceName);
+    }
+
+    public void updateMyDeviceName(WifiP2pDevice device){
+        String DeviceName = device.deviceName;
+        TextView me = (TextView)findViewById(R.id.my_device);
+        me.setText(DeviceName);
     }
 }
