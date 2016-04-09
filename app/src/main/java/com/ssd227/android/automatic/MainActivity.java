@@ -48,6 +48,10 @@ public class MainActivity extends Activity
     private String oldDeviceName = null;
 
 
+    public void setIsconnected(boolean isconnected){
+        this.isconnected = isconnected;
+    }
+
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled)
     {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
@@ -134,7 +138,7 @@ public class MainActivity extends Activity
                 oldDeviceName = device.deviceName;
                 Log.d(MainActivity.TAG, "connect successfully");
                 updatePeerDeviceName(device);
-                isconnected = true;
+                setIsconnected(true);
             }
 
             @Override
@@ -243,6 +247,12 @@ public class MainActivity extends Activity
         TextView peer = (TextView)findViewById(R.id.peer_device);
         peer.setText(DeviceName);
     }
+
+    public void refreshPeerDeviceName(){
+        TextView peer = (TextView)findViewById(R.id.peer_device);
+        peer.setText("");
+    }
+
 
     public void updateMyDeviceName(WifiP2pDevice device){
         String DeviceName = device.deviceName;
