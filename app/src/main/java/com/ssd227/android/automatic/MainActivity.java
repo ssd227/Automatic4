@@ -73,6 +73,7 @@ public class MainActivity extends Activity
         channel = manager.initialize(this, getMainLooper(), null);
 
         updateUI();
+        autoScanner();
 
     }
 
@@ -270,10 +271,44 @@ public class MainActivity extends Activity
             @Override
             public void run() {
                 fragment.updateUI_list();
-                handler.postDelayed(this,1000);
+                handler.postDelayed(this, 1000);
             }
         });
 
+    }
 
+    private void autoScanner()
+    {
+        final Handler handler = new Handler();
+        handler.post(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if(isWifiP2pEnabled)
+                {
+                    if(!isconnected)
+                    {
+                        manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
+                            @Override
+                            public void onSuccess() {
+                                Toast.makeText(MainActivity.this,
+                                        "Discovery Initiated", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onFailure(int reasonCode) {
+                                Toast.makeText(MainActivity.this,
+                                        "Discovery Failed : " + reasonCode,
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+
+                handler.postDelayed(this,5000);
+            }
+
+        });
     }
 }
