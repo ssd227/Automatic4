@@ -42,9 +42,9 @@ public class FileListFragment extends ListFragment
 {
     public static HashMap<String,Integer> fileHash = null;
 
-
     private final String systemHashPath =Environment.getExternalStorageDirectory()
             + "/WIFIP2P"+"/hashMap.data";
+    private Context context;
 
     public FileListFragment()
     {
@@ -65,9 +65,10 @@ public class FileListFragment extends ListFragment
     {
 
         String[] filenames = stackToNames(scaner());
+        context = inflater.getContext();
         //set list adapter
         ArrayAdapter<String> listAdapter = new ArrayAdapter<>(
-                inflater.getContext(),
+                context,
                 android.R.layout.simple_list_item_1,
                 filenames);
         setListAdapter(listAdapter);
@@ -169,7 +170,19 @@ public class FileListFragment extends ListFragment
         for(File file : scaner())
         {
             fileHash.put(file.getName(),i);
+
         }
+
+    }
+
+    public void updateUI_list(){
+        String[] filenames = stackToNames(scaner());
+        //set list adapter
+        ArrayAdapter<String> listAdapter = new ArrayAdapter<>(
+                context,
+                android.R.layout.simple_list_item_1,
+                filenames);
+        setListAdapter(listAdapter);
     }
 
 

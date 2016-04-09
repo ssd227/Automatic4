@@ -15,6 +15,7 @@ import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
 import android.net.wifi.p2p.WifiP2pManager.PeerListListener;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.LogRecord;
 
 
 public class MainActivity extends Activity
@@ -65,6 +67,8 @@ public class MainActivity extends Activity
 
         manager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         channel = manager.initialize(this, getMainLooper(), null);
+
+        updateUI();
 
     }
 
@@ -244,5 +248,22 @@ public class MainActivity extends Activity
         String DeviceName = device.deviceName;
         TextView me = (TextView)findViewById(R.id.my_device);
         me.setText(DeviceName);
+    }
+
+    private void updateUI()
+    {
+        final FileListFragment fragment = (FileListFragment) getFragmentManager()
+                .findFragmentById(R.id.frag_fileList);
+
+        final Handler handler = new Handler();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                fragment.updateUI_list();
+                handler.postDelayed(this,1000);
+            }
+        });
+
+
     }
 }
