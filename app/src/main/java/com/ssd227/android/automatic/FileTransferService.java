@@ -16,9 +16,6 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-
-
-
 /**
  * A service that process each file transfer request i.e Intent by opening a
  * socket connection with the WiFi Direct Group Owner and writing the file
@@ -29,7 +26,6 @@ public class FileTransferService extends IntentService
     private static final int SOCKET_TIMEOUT = 5000;
     public static final String ACTION_SEND_FILE = "com.example.android.wifidirect.SEND_FILE";
     public static final String EXTRAS_FILE_PATH = "file_url";
-    public static final String EXTRAS_FILE_COPY_NUM = "copy num";
     public static final String EXTRAS_GROUP_OWNER_ADDRESS = "go_host";
     public static final String EXTRAS_GROUP_OWNER_PORT = "go_port";
 
@@ -57,8 +53,6 @@ public class FileTransferService extends IntentService
         if (intent.getAction().equals(ACTION_SEND_FILE))
         {
             String filepath = intent.getExtras().getString(EXTRAS_FILE_PATH);
-            int copy_num = intent.getExtras().getInt(EXTRAS_FILE_COPY_NUM);
-
 
             String host = intent.getExtras().getString(EXTRAS_GROUP_OWNER_ADDRESS);
             Socket socket = new Socket();
@@ -93,12 +87,6 @@ public class FileTransferService extends IntentService
                 new DataOutputStream(outputStream).writeUTF(filename);
                 outputStream.flush();
                 Log.d(MainActivity.TAG, "send file name :" + filename);
-
-
-                //send copy number
-                new DataOutputStream(outputStream).writeInt(copy_num);
-                outputStream.flush();
-                Log.d(MainActivity.TAG, "send copy number ");
 
 
                 //send file data

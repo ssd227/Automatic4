@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
-
 /**
  * Created by ssd on 16/3/21.
  *
@@ -37,10 +36,6 @@ public class FileReceive implements Runnable
 
             //get file name
             String filename = new DataInputStream(inputstream).readUTF();
-
-            //get copy num
-            int copy_num = new DataInputStream(inputstream).readInt();
-            FileListFragment.fileHash.put(filename, copy_num);
 
             //get file data
             final File f = new File(

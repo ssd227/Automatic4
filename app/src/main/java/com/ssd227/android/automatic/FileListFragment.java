@@ -40,24 +40,9 @@ import java.util.Stack;
 public class FileListFragment extends ListFragment
         implements  ConnectionInfoListener
 {
-    public static HashMap<String,Integer> fileHash = null;
-
-    private final String systemHashPath =Environment.getExternalStorageDirectory()
-            + "/WIFIP2P"+"/hashMap.data";
     private Context context;
 
-    public FileListFragment()
-    {
-        // Required empty public constructor
-        File f = new File(systemHashPath);
-        if(f.exists()){
-            fileHash = (HashMap<String,Integer>)readObjectFromFile(systemHashPath);
-        }
-        else {
-            fileHash = new HashMap<String,Integer>();
-            send(1);
-        }
-    }
+    public FileListFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,8 +63,6 @@ public class FileListFragment extends ListFragment
 
     @Override
     public void onDestroyView() {
-
-        writeObjecttoFile(systemHashPath, fileHash);
         super.onDestroyView();
     }
 
@@ -95,7 +78,6 @@ public class FileListFragment extends ListFragment
             // One common case is creating a server thread and accepting
             // incoming connections.
             new FileServerAsyncTask(getActivity()).execute();
-
 
         }
         else if (info.groupFormed)
@@ -129,30 +111,24 @@ public class FileListFragment extends ListFragment
                 for (File file : fileStack)
                 {
                     Log.d(MainActivity.TAG, file.getAbsolutePath());
-                    //hashMap check
-                    String name = file.getName();
-                    int num = fileHash.get(name);
-                    if(num > 1)
-                    {
-                        fileHash.put(name,num - num/2);
-                        String filepath = file.getAbsolutePath();
-                        //
-                        // open a new client to send  each file
-                        Intent serviceIntent = new Intent(getActivity(),
-                                FileTransferService.class);
-                        serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 
-                        // add some extra info
-                        serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filepath);
-                        serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_COPY_NUM, num/2);
+                    String filepath = file.getAbsolutePath();
+                    //
+                    // open a new client to send  each file
+                    Intent serviceIntent = new Intent(getActivity(),
+                            FileTransferService.class);
+                    serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
 
-                        // network info
-                        serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_ADDRESS,
-                                info.groupOwnerAddress.getHostAddress());
-                        serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_PORT, 8988);
+                    // add some extra info
+                    serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, filepath);
 
-                        getActivity().startService(serviceIntent);
-                    }
+                    // network info
+                    serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_ADDRESS,
+                            info.groupOwnerAddress.getHostAddress());
+                    serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_PORT, 8988);
+
+                    getActivity().startService(serviceIntent);
+
                 }
             }
         }
@@ -160,20 +136,6 @@ public class FileListFragment extends ListFragment
 
     }
 
-
-
-    /**
-     * make all value in hashMap  10 copies
-     */
-    public void send(int i)
-    {
-        for(File file : scaner())
-        {
-            fileHash.put(file.getName(),i);
-
-        }
-
-    }
 
     public void updateUI_list(){
         String[] filenames = stackToNames(scaner());
@@ -198,13 +160,6 @@ public class FileListFragment extends ListFragment
         for (File fi : scaner())
         {
             String str = fi.getName();
-            if(fileHash.get(str)!= null){
-                str += ("    (" + fileHash.get(str))+" ";
-            }
-            else {
-                str += "    (0 ";
-            }
-            str += "copies) ";
             filenames[i] = str;
             i++;
         }
@@ -254,55 +209,6 @@ public class FileListFragment extends ListFragment
         }
     }
 
-    /**
-     *
-     * @param filepath
-     * @return
-     */
-    private Object readObjectFromFile(String filepath)
-    {
-        Object temp=null;
-        File file =new File(filepath);
-        FileInputStream in;
-        try {
-            in = new FileInputStream(file);
-            ObjectInputStream objIn=new ObjectInputStream(in);
-            temp=objIn.readObject();
-            objIn.close();
-            //System.out.println("read object success!");
-        } catch (IOException e) {
-           // System.out.println("read object failed");
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return temp;
-    }
-
-    /**
-     *
-     * @param filepath
-     * @param fileHash
-     */
-    private void writeObjecttoFile(String filepath, Object fileHash){
-        File file = new File(filepath);
-
-        FileOutputStream out;
-        try {
-            out = new FileOutputStream(file);
-            ObjectOutputStream objOut=new ObjectOutputStream(out);
-
-            objOut.writeObject(fileHash);
-            objOut.flush();
-            objOut.close();
-            //System.out.println("write object success!");
-
-        } catch (IOException e) {
-            //System.out.println("write object failed");
-            e.printStackTrace();
-        }
-
-    }
 
     /**
      * A simple server socket that accepts connection and writes some data on
@@ -354,15 +260,9 @@ public class FileListFragment extends ListFragment
 
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see android.os.AsyncTask#onPreExecute()
-         */
         @Override
         protected void onPreExecute()
         {
-
         }
 
     }

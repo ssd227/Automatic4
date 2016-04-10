@@ -34,8 +34,7 @@ public class MainActivity extends Activity
     public static final String TAG = "Automatic" ;
 
     private boolean isWifiP2pEnabled = false;
-    private boolean retryChannel = false;
-    private boolean isconnected = false;
+    private boolean isConnected = false;
 
     private final IntentFilter intentFilter = new IntentFilter();
 
@@ -48,8 +47,8 @@ public class MainActivity extends Activity
     private String oldDeviceName = null;
 
 
-    public void setIsconnected(boolean isconnected){
-        this.isconnected = isconnected;
+    public void setIsConnected(boolean isConnected){
+        this.isConnected = isConnected;
     }
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled)
@@ -139,7 +138,7 @@ public class MainActivity extends Activity
                 oldDeviceName = device.deviceName;
                 Log.d(MainActivity.TAG, "connect successfully");
                 updatePeerDeviceName(device);
-                setIsconnected(true);
+                setIsConnected(true);
             }
 
             @Override
@@ -166,7 +165,7 @@ public class MainActivity extends Activity
             case R.id.atn_direct_send:
                 final FileListFragment fragment = (FileListFragment) getFragmentManager()
                         .findFragmentById(R.id.frag_fileList);
-                fragment.send(10);
+                //fragment.send(10);
 
                 return true;
 
@@ -287,7 +286,7 @@ public class MainActivity extends Activity
             {
                 if(isWifiP2pEnabled)
                 {
-                    if(!isconnected)
+                    if(!isConnected)
                     {
                         manager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
                             @Override
