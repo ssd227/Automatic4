@@ -103,7 +103,6 @@ public class FileListFragment extends ListFragment
             findAllFiles(dirs, fileStack);
 
 
-
             if (!fileStack.empty()) {
                 Log.d(MainActivity.TAG, "stack is not empty");
 
@@ -128,12 +127,9 @@ public class FileListFragment extends ListFragment
                     serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_PORT, 8988);
 
                     getActivity().startService(serviceIntent);
-
                 }
             }
         }
-
-
     }
 
 
@@ -209,7 +205,6 @@ public class FileListFragment extends ListFragment
         }
     }
 
-
     /**
      * A simple server socket that accepts connection and writes some data on
      * the stream.
@@ -246,18 +241,14 @@ public class FileListFragment extends ListFragment
                     Thread t = new Thread(r);
                     t.start();
                     i++;
-
                 }
-
             }
             catch (IOException e) {
                 Log.e(MainActivity.TAG, e.getMessage());
             }
             finally {
-
                 return null;
             }
-
         }
 
         @Override
