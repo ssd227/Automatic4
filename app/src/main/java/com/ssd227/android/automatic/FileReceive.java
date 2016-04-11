@@ -18,42 +18,63 @@ import java.net.Socket;
 public class FileReceive implements Runnable
 {
     private Socket client;
+    private String[] fileNamePool;
 
     /**
      Constructs a handler.
      @param client the incoming socket
      */
-    public FileReceive(Socket client)
+    public FileReceive(Socket client, String[] fileNamePool)
     {
         this.client = client;
+        this.fileNamePool = fileNamePool;
+    }
+
+    boolean inFileNamePool(String filename){
+        for(String nameInPool: fileNamePool){
+            if (filename.equals(nameInPool)){
+                return true;
+            }
+        }
+        return false;
     }
 
     public void run()
     {
-        try{
+        try
+        {
             InputStream inputstream = client.getInputStream();
 
 
             //get file name
             String filename = new DataInputStream(inputstream).readUTF();
 
-            //get file data
-            final File f = new File(
-                    Environment.getExternalStorageDirectory() + "/WIFIP2P/"
-                            +"/Date/" +filename);
+            if(inFileNamePool(filename))
+            {
+                client.close();
+            }
+            else
+            {
+                //get file data
+                final File f = new File(
+                        Environment.getExternalStorageDirectory() + "/WIFIP2P/"
+                                +"/Date/" +filename);
 
-            File dirs = new File(f.getParent());
-            if (!dirs.exists())
-                dirs.mkdirs();
-            f.createNewFile();
+                File dirs = new File(f.getParent());
+                if (!dirs.exists())
+                    dirs.mkdirs();
+                f.createNewFile();
 
-            Log.d(MainActivity.TAG, "server: copying files " + f.toString());
+                Log.d(MainActivity.TAG, "server: copying files " + f.toString());
 
-            FileListFragment.copyFile(inputstream, new FileOutputStream(f));
+                FileListFragment.copyFile(inputstream, new FileOutputStream(f));
 
-            client.close();
+                client.close();
+            }
+
         }
-        catch (IOException e) {
+        catch (IOException e)
+        {
             Log.e(MainActivity.TAG, e.getMessage());
         }
 

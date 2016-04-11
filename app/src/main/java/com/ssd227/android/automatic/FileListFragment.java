@@ -149,7 +149,7 @@ public class FileListFragment extends ListFragment
      * @param files
      * @return String array with some info needed
      */
-    private String[] stackToNames(Stack<File> files)
+    public static String[] stackToNames(Stack<File> files)
     {
         String[] filenames = new String[files.size()];
         int i=0;
@@ -166,7 +166,7 @@ public class FileListFragment extends ListFragment
      *
      * @return all files found in the given directory path
      */
-    private Stack<File> scaner()
+    public static Stack<File> scaner()
     {
         File dirs = new File(
                 Environment.getExternalStorageDirectory() + "/WIFIP2P"+"/Date");
@@ -188,7 +188,7 @@ public class FileListFragment extends ListFragment
      * @param dirs
      * @param stack keep all files found in stack and return
      */
-    private void findAllFiles(File dirs, Stack<File> stack)
+    public static void findAllFiles(File dirs, Stack<File> stack)
     {
         File files[] = dirs.listFiles();
         if (files != null)
@@ -213,6 +213,7 @@ public class FileListFragment extends ListFragment
     {
 
         private Context context;
+        private String[] fileNamePool;
 
         /**
          * @param context
@@ -234,10 +235,13 @@ public class FileListFragment extends ListFragment
 
                 int i=0;
                 while (true){
+
+                    fileNamePool = FileListFragment.stackToNames(FileListFragment.scaner());
+
                     Socket client = serverSocket.accept();
                     Log.d(MainActivity.TAG, "Server: connection done");
 
-                    Runnable r = new FileReceive(client);
+                    Runnable r = new FileReceive(client, fileNamePool);
                     Thread t = new Thread(r);
                     t.start();
                     i++;
